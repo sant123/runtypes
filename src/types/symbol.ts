@@ -1,4 +1,3 @@
-// deno-lint-ignore-file ban-types
 import type { Reflect } from "../reflect.ts";
 import { create, type Runtype } from "../runtype.ts";
 import { FAILURE, SUCCESS } from "../util.ts";
