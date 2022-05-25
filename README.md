@@ -135,10 +135,10 @@ In TypeScript, the inferred type of `Asteroid` in the above example is
 
 ```ts
 Runtype<{
-  type: 'asteroid'
-  location: [number, number, number]
-  mass: number
-}>
+  type: "asteroid";
+  location: [number, number, number];
+  mass: number;
+}>;
 ```
 
 That is, it's a `Runtype<Asteroid>`, and you could annotate it as such. But we
