@@ -1,5 +1,6 @@
-import { assertEquals } from "../../deps/testing.ts";
-import { expect } from "../../deps/chai.ts";
+import { assertEquals, assertThrows } from "../../deps/testing.ts";
+import { assertNotThrows } from "../../testing/utils/assertNotThrows.ts";
+
 import {
   Boolean,
   Literal,
@@ -8,6 +9,7 @@ import {
   String,
   Template,
   Union,
+  ValidationError,
 } from "../../mod.ts";
 
 Deno.test("template", async (t) => {
@@ -39,7 +41,12 @@ Deno.test("template", async (t) => {
     });
 
     const dogAlice = "Alice's cat";
-    expect(() => Dog.check(dogAlice)).to.throw(
+    assertThrows(
+      () =>
+        Dog.check(
+          dogAlice,
+        ),
+      ValidationError,
       'Expected string `${"Bob" | "Jeff"}\'s dog`, but was "Alice\'s cat"',
     );
   });
@@ -49,7 +56,7 @@ Deno.test("template", async (t) => {
     const Dog = Template(Owner, "'s dog");
     type Dog = Static<typeof Dog>;
     const catBob: Dog = "Bob's dog";
-    expect(() => Dog.check(catBob)).not.to.throw();
+    assertNotThrows(() => Dog.check(catBob));
   });
 
   await t.step("supports various inner runtypes", () => {
@@ -62,11 +69,11 @@ Deno.test("template", async (t) => {
       }),
     );
     type DogCount = Static<typeof DogCount>;
-    expect(() => DogCount.check("101 dogs")).not.to.throw();
-    expect(() => DogCount.check("101 Dogs")).not.to.throw();
-    expect(() => DogCount.check("101dogs")).to.throw();
-    expect(() => DogCount.check("101 false dogs")).not.to.throw();
-    expect(() => DogCount.check("101 cats")).to.throw();
+    assertNotThrows(() => DogCount.check("101 dogs"));
+    assertNotThrows(() => DogCount.check("101 Dogs"));
+    assertThrows(() => DogCount.check("101dogs"));
+    assertNotThrows(() => DogCount.check("101 false dogs"));
+    assertThrows(() => DogCount.check("101 cats"));
   });
 
   await t.step("emits TYPE_INCORRECT for values other than string", () => {

@@ -1,5 +1,6 @@
 import { assertEquals, assertObjectMatch } from "../../deps/testing.ts";
-import { expect } from "../../deps/chai.ts";
+import { assertNotThrows } from "../../testing/utils/assertNotThrows.ts";
+
 import {
   InstanceOf,
   Literal,
@@ -8,6 +9,7 @@ import {
   String,
   Union,
 } from "../../mod.ts";
+
 import { Failcode } from "../result.ts";
 import { Static } from "../runtype.ts";
 import { LiteralBase } from "./literal.ts";
@@ -20,7 +22,7 @@ Deno.test("union", async (t) => {
       const values = ["Unknown", "Online", "Offline"] as const;
       type ElementOf<T extends readonly unknown[]> = T extends
         readonly (infer E)[] ? E : never;
-      type LiteralOf<T extends readonly unknown[]> = {
+      type LiteralOf<T extends readonly string[]> = {
         [K in keyof T]: T[K] extends ElementOf<T>
           ? T[K] extends LiteralBase ? Literal<T[K]>
           : never
@@ -31,7 +33,7 @@ Deno.test("union", async (t) => {
       const Values = Union<L>(...literals);
       type Values = Static<typeof Values>;
       const v: Values = "Online";
-      expect(() => Values.check(v)).not.to.throw();
+      assertNotThrows(() => Values.check(v));
     });
   });
 
@@ -96,8 +98,8 @@ Deno.test("union", async (t) => {
           },
         );
 
-        expect(Shape.validate({ kind: "other", size: new Date() })).not.to
-          .haveOwnProperty("key");
+        const v = Shape.validate({ kind: "other", size: new Date() });
+        assertEquals(Object.hasOwn(v, "key"), false);
       },
     );
 
@@ -116,9 +118,8 @@ Deno.test("union", async (t) => {
         });
 
         const Shape = Union(Square, Rectangle, CircularSquare);
-
-        expect(Shape.validate({ kind: "square", size: new Date() })).not.to
-          .haveOwnProperty("key");
+        const v = Shape.validate({ kind: "square", size: new Date() });
+        assertEquals(Object.hasOwn(v, "key"), false);
       },
     );
 
@@ -133,9 +134,8 @@ Deno.test("union", async (t) => {
         });
 
         const Shape = Union(Square, Rectangle, InstanceOf(Date));
-
-        expect(Shape.validate({ kind: "square", size: new Date() })).not.to
-          .haveOwnProperty("key");
+        const v = Shape.validate({ kind: "square", size: new Date() });
+        assertEquals(Object.hasOwn(v, "key"), false);
       },
     );
   });
